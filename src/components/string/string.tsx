@@ -52,14 +52,14 @@ export const StringComponent: React.FC = () => {
       <form className={styles.input_container} onSubmit={onSubmit}>
         <Input
           maxLength={11}
-          height={60}
+      
           type="text"
           onChange={onChange}
           isLimitText={true}
           autoFocus
         />
         <Button
-          height={60}
+          
           type="submit"
           text="Развернуть"
           isLoader={isLoading}
