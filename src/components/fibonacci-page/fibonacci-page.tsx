@@ -55,8 +55,6 @@ export const FibonacciPage: React.FC = () => {
     <SolutionLayout title="Последовательность Фибоначчи">
       <form className={styles.input_container} onSubmit={onSubmit}>
         <Input
-          max={19}
-          height={60}
           type="number"
           placeholder="Введите число"
           isLimitText={true}
@@ -64,7 +62,6 @@ export const FibonacciPage: React.FC = () => {
           autoFocus
         />
         <Button
-          height={60}
           type="submit"
           text="Рассчитать"
           isLoader={loader}
