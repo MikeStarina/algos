@@ -1,0 +1,25 @@
+.input_container {
+    width: 100%;
+    max-width: 515px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.result_container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 120px auto 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    column-gap: 15px;
+    row-gap: 50px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
