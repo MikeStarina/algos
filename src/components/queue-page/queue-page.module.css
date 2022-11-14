@@ -1,0 +1,32 @@
+.input_container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+
+
+.button_container {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 0 0 50px;
+}
+
+
+
+.result_container {
+    width: 100%;
+    margin: 120px auto 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
