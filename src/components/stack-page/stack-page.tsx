@@ -5,16 +5,20 @@ import { Circle } from "../ui/circle/circle";
 import { Input } from "../ui/input/input";
 import { Button } from "../ui/button/button";
 import { stackCircleStyle } from "../utils/stack-utils";
+import { Stack } from "./stack-class/stack-class";
 
+const stackItem = new Stack<string>()
 
 export const StackPage: React.FC = () => {
 
   const [ value, setValue ] = useState<string>('');
   const [ stack, setStack ] = useState<string[]>([]);
   const [ modifiedIndex, setModifiedIndex ] = useState<number>(-1);
+  
 
 
   const addToStackFunc = async (value: string) => {
+    stackItem.push(value);
     const newStack = stack;
     newStack.push(value);
     setStack([...newStack]);
@@ -24,7 +28,7 @@ export const StackPage: React.FC = () => {
   }
 
   const removeFromStack = async () => {
-    
+    stackItem.pop();
     setModifiedIndex(getStackSize(stack) - 1);
     await new Promise(resolve => setTimeout(resolve, 1000));
     setModifiedIndex(-1);
@@ -36,7 +40,7 @@ export const StackPage: React.FC = () => {
   }
 
   const getStackSize = (stack: string[]) => {
-    return stack.length;
+    return stackItem.getSize();
   }
 
   const onChange = (event: FormEvent<HTMLInputElement>) => {
@@ -54,10 +58,12 @@ export const StackPage: React.FC = () => {
 
   const deleteButtonOnClickHandler = () => {
     removeFromStack();
+    
   }
 
   const resetButtonClickHandler = () => {
     setStack([...[]]);
+    stackItem.clear();
   }
 
   return (

@@ -5,8 +5,9 @@ import { Circle } from "../ui/circle/circle";
 import { Input } from "../ui/input/input";
 import { Button } from "../ui/button/button";
 import { stackCircleStyle } from "../utils/stack-utils";
+import { Queue } from "./queue-class/queue-class";
 
-
+const queueItem = new Queue<string>(6);
 
 export const QueuePage: React.FC = () => {
 
@@ -18,7 +19,7 @@ export const QueuePage: React.FC = () => {
 
 
   const enqueue = async (value: string) => {
-
+    queueItem.enqueue(value);
     if (tail < 5) {
 
       const newTail = tail + 1;
@@ -35,7 +36,7 @@ export const QueuePage: React.FC = () => {
   }
 
   const dequeue= async () => {
-
+    queueItem.dequeue();
     setModifiedIndex(head);
     await new Promise(resolve => setTimeout(resolve, 1000));
     setModifiedIndex(-1);
@@ -69,17 +70,19 @@ export const QueuePage: React.FC = () => {
   }
 
   const deleteButtonOnClickHandler = () => {
+
     dequeue();
   }
 
   const resetButtonClickHandler = () => {
+    queueItem.clear();
     setQueue(['','','','','','']);
     setHead(-1)
     setTail(-1)
   }
 
   return (
-    <SolutionLayout title="Стек">
+    <SolutionLayout title="Очередь">
        <form className={styles.input_container} onSubmit={onSubmit}>
         <Input
           maxLength={4}      
