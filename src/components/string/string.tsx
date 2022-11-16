@@ -9,20 +9,31 @@ import { swap } from "../utils/string-utils";
 import styles from "./string.module.css";
 
 export const StringComponent: React.FC = () => {
+  const [inputValue, setInputValue] = useState<string>('');
   const [lettersArray, setLettersArray] = useState<string[]>([]);
-  const [isLoading, setButtonLoader] = useState<boolean>(false);
   const [modifiedIndexes, setModifiedIndexes] = useState<number[]>([]);
   const [changingIndexes, setChangingIndexes] = useState<number[]>([]);
+  const [controlsState, setControlsState] = useState<{disabled: boolean; isLoading: boolean}>({
+    disabled: true,
+    isLoading: false,
+  })
 
   const onChange = (event: FormEvent<HTMLInputElement>) => {
+
     event.preventDefault();
-    setModifiedIndexes([]);
-    const arrayFromValue = event.currentTarget.value.split("");
-    setLettersArray(arrayFromValue);
+    
+    if (event.currentTarget.validity.valid) {
+      setControlsState({...controlsState, disabled: false});
+      setInputValue(event.currentTarget.value);
+      setModifiedIndexes([]);
+      const arrayFromValue = event.currentTarget.value.split("");
+      setLettersArray(arrayFromValue);
+    }
+   
   };
 
   const reverse = async (arr: string[]) => {
-    setButtonLoader(true);
+    setControlsState({ disabled: true, isLoading: true })
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     for (let i = 0; i <= Math.floor(lettersArray.length / 2); i++) {
@@ -38,13 +49,14 @@ export const StringComponent: React.FC = () => {
     }
 
     setLettersArray([...lettersArray]);
-    setButtonLoader(false);
+    setControlsState({ disabled: true, isLoading: false })
   };
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setInputValue('');
     reverse(lettersArray);
+    
   };
 
   return (
@@ -52,17 +64,18 @@ export const StringComponent: React.FC = () => {
       <form className={styles.input_container} onSubmit={onSubmit}>
         <Input
           maxLength={11}
-      
+          value={inputValue}
           type="text"
           onChange={onChange}
           isLimitText={true}
           autoFocus
         />
         <Button
-          
+          disabled={controlsState.disabled}
           type="submit"
           text="Развернуть"
-          isLoader={isLoading}
+          isLoader={controlsState.isLoading}
+
         />
       </form>
 

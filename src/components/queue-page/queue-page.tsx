@@ -9,6 +9,15 @@ import { Queue } from "./queue-class/queue-class";
 
 const queueItem = new Queue<string>(6);
 
+
+type TControlsState = {
+  disabled: {delBttn: boolean; addBttn: boolean; clearBttn: boolean}
+  loading: {delBttn: boolean; addBttn: boolean; clearBttn: boolean}
+}
+
+
+
+
 export const QueuePage: React.FC = () => {
 
   const [ value, setValue ] = useState<string>('');
@@ -16,31 +25,44 @@ export const QueuePage: React.FC = () => {
   const [ head, setHead ] = useState<number>(-1);
   const [ tail, setTail ] = useState<number>(-1);
   const [ modifiedIndex, setModifiedIndex ] = useState<number>(-1);
-
+  const [controlsState, setControlsState] = useState<TControlsState>({
+    disabled: {
+      delBttn: true,
+      addBttn: true,
+      clearBttn: true,
+    },
+    loading: {delBttn: false, addBttn: false, clearBttn: false}
+  })
+ 
 
   const enqueue = async (value: string) => {
     queueItem.enqueue(value);
+    
+   
     if (tail < 5) {
-
+      
       const newTail = tail + 1;
       let newQueue = queue;
       newQueue[newTail] = value;
       if (head === -1) setHead(0);
       setTail(newTail);
       setQueue([...newQueue]);
+      
       setModifiedIndex(newTail);
       await new Promise(resolve => setTimeout(resolve, 1000));
       setModifiedIndex(-1);
-    
+      
     }
+    setControlsState({disabled: {delBttn: false, addBttn: true, clearBttn: false}, loading: {delBttn: false, addBttn: false, clearBttn: false}})
   }
 
   const dequeue= async () => {
-    queueItem.dequeue();
+    
     setModifiedIndex(head);
+    setControlsState({...controlsState, loading: {delBttn: true, addBttn: false, clearBttn: false}})
     await new Promise(resolve => setTimeout(resolve, 1000));
     setModifiedIndex(-1);
-
+    setControlsState({...controlsState, loading: {delBttn: false, addBttn: false, clearBttn: false}})
     let newQueue = queue;
     newQueue[head] = '';
     if(head !== tail) {
@@ -48,6 +70,12 @@ export const QueuePage: React.FC = () => {
     } else {
       setHead(-1)
       setTail(-1)
+      setControlsState({...controlsState, disabled: 
+        {
+          delBttn: true,
+          addBttn: true,
+          clearBttn: true,
+        }})
     }
     
     
@@ -58,20 +86,47 @@ export const QueuePage: React.FC = () => {
 
   const onChange = (event: FormEvent<HTMLInputElement>) => {
     event.preventDefault();
-    setValue(event.currentTarget.value);
+    if (event.currentTarget.validity.valid && tail !== 5) {
+      setValue(event.currentTarget.value);
+      setControlsState({...controlsState, disabled: 
+      {
+        delBttn: true,
+        addBttn: false,
+        clearBttn: true,
+      }})
+    }
+    if (!queueItem.isEmpty()) {
+      setControlsState({...controlsState, disabled: 
+        {
+          delBttn: false,
+          addBttn: false,
+          clearBttn: false,
+        }})
+    }
+   
+    
   }
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+   
     event.preventDefault();
-    if (value) enqueue(value);
+    if (value) {
+      enqueue(value)
+      setControlsState({loading: {addBttn: true, delBttn: false, clearBttn: false}, disabled: 
+        {
+          delBttn: false,
+          addBttn: true,
+          clearBttn: false,
+        }})
+    };
     
-    event.currentTarget.reset();
+    
     setValue('');
   }
 
   const deleteButtonOnClickHandler = () => {
-
     dequeue();
+    queueItem.dequeue()
   }
 
   const resetButtonClickHandler = () => {
@@ -79,6 +134,12 @@ export const QueuePage: React.FC = () => {
     setQueue(['','','','','','']);
     setHead(-1)
     setTail(-1)
+    setControlsState({...controlsState, disabled: 
+      {
+        delBttn: true,
+        addBttn: true,
+        clearBttn: true,
+      }})
   }
 
   return (
@@ -90,21 +151,27 @@ export const QueuePage: React.FC = () => {
           isLimitText={true}
           autoFocus
           onChange={onChange}
+          value={value}
         />
         <Button          
           type="submit"
           text="Добавить"
+          disabled={controlsState.disabled.addBttn}
+          isLoader={controlsState.loading.addBttn}
         />
         <Button          
           type="button"
           text="Удалить"
           onClick={deleteButtonOnClickHandler}
+          disabled={controlsState.disabled.delBttn}
+          isLoader={controlsState.loading.delBttn}
         />
         <div className={styles.button_container}>
           <Button          
             type="button"
             text="Очистить"
             onClick={resetButtonClickHandler}
+            disabled={controlsState.disabled.clearBttn}
           />
         </div>
       </form>

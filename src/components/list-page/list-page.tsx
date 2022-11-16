@@ -20,6 +20,26 @@ interface IShiftElement {
 	position: 'addAction' | 'removeAction';
 }
 
+type TControlsState = {
+ 
+    addHead: { isLoading: boolean; disabled: boolean };
+    addTail: { isLoading: boolean; disabled: boolean };
+    delHead: { isLoading: boolean; disabled: boolean };
+    delTail: { isLoading: boolean; disabled: boolean };
+    addIndex: { isLoading: boolean; disabled: boolean };
+    delIndex: { isLoading: boolean; disabled: boolean };
+  
+}
+
+const initialControlState: TControlsState = {
+  addHead: { isLoading: false, disabled: true},
+  addTail: {isLoading: false, disabled: true},
+  delHead: {isLoading: false, disabled: false},
+  delTail: {isLoading: false, disabled: false},
+  addIndex: {isLoading: false, disabled: true},
+  delIndex: {isLoading: false, disabled: true},
+}
+
 export const initialArr = ['0', '34', '8', '1'];
 export const initialDisplayedList: IListArr[] = initialArr.map((item) => ({
 	value: item,
@@ -35,27 +55,41 @@ export const ListPage: React.FC = () => {
 
 
   const [ value, setValue] = useState<string>('');
-  const [ index, setIndex ] = useState<number>();
-  
-  console.log(list);
+  const [ index, setIndex ] = useState<string>('');
   const [ displayedList, setDisplayedList] = useState<IListArr[]>(initialDisplayedList);
+  const [ controlsState, setControlsState ] = useState<TControlsState>(initialControlState)
 
   
   
 
   const valueInputOnChangeHandler = (event: FormEvent<HTMLInputElement>) => {
-    setValue(event.currentTarget.value);
+    if (event.currentTarget.validity.valid) {
+      setValue(event.currentTarget.value);
+      setControlsState({
+        ...controlsState, 
+        addHead: {isLoading: false, disabled: false},
+        addTail: {isLoading: false, disabled: false},
+
+      })
+    }
+    
   };
 
   const indexInputOnChangeHandler = (event: FormEvent<HTMLInputElement>) => {
-    const inputValue = parseInt(event.currentTarget.value);
-    if (inputValue) {setIndex(inputValue)}
+    
+    if (event.currentTarget.validity.valid) {
+      setIndex(event.currentTarget.value)
+      setControlsState({
+        ...controlsState, 
+        addIndex: {isLoading: false, disabled: false},
+        delIndex: {isLoading: false, disabled: false},
+      })
+    }
   }
 
 
   const addToHeadClickHandler = async () => { //done
     if (value) list.prepend(value);
-    console.log(list);
     let newDisplayedList = displayedList;
     newDisplayedList.unshift({
       value: '',
@@ -67,6 +101,12 @@ export const ListPage: React.FC = () => {
       }
     })
     setDisplayedList([...newDisplayedList]);
+    setControlsState({
+      ...controlsState, 
+      addHead: {isLoading: true, disabled: true},
+      addTail: {isLoading: false, disabled: true},
+
+    })
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     newDisplayedList[0] = {
@@ -75,6 +115,14 @@ export const ListPage: React.FC = () => {
       shiftElement: null
     }
     setDisplayedList([...newDisplayedList]);
+    setControlsState({
+      ...controlsState, 
+      addHead: {isLoading: false, disabled: true},
+      addTail: {isLoading: false, disabled: true},
+
+    })
+    setValue('');
+    setIndex('');
   }
 
   const addToTailClickHandler = async () => { //done
@@ -91,6 +139,12 @@ export const ListPage: React.FC = () => {
       }
     })
     setDisplayedList([...newDisplayedList]);
+    setControlsState({
+      ...controlsState, 
+      addHead: {isLoading: false, disabled: true},
+      addTail: {isLoading: true, disabled: true},
+
+    })
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     
@@ -99,7 +153,15 @@ export const ListPage: React.FC = () => {
       state: ElementStates.Default,
       shiftElement: null
     }
+    setControlsState({
+      ...controlsState, 
+      addHead: {isLoading: false, disabled: true},
+      addTail: {isLoading: false, disabled: true},
+
+    })
     setDisplayedList([...newDisplayedList]);
+    setValue('');
+    setIndex('');
   }
 
 
@@ -107,6 +169,12 @@ export const ListPage: React.FC = () => {
 
   const deleteHeadButtonClickHandler = async () => {  //done
     list.deleteHead();
+    setControlsState({
+      ...controlsState, 
+      delHead: {isLoading: true, disabled: true},
+      delTail: {isLoading: false, disabled: true},
+      delIndex: {isLoading: false, disabled: true}
+    })
     const newDisplayedList = displayedList;
     newDisplayedList[0].shiftElement = {
       value: newDisplayedList[0].value,
@@ -118,10 +186,25 @@ export const ListPage: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     newDisplayedList.shift();
     setDisplayedList([...newDisplayedList]);
+    setControlsState({...controlsState, delHead: {isLoading: false, disabled: false}})
+    if (newDisplayedList.length === 0) {
+      setControlsState({
+        ...controlsState, 
+        delHead: {isLoading: false, disabled: true},
+        delTail: {isLoading: false, disabled: true},
+        delIndex: {isLoading: false, disabled: true}
+      })
+    }
   }
 
   const deleteTailButtonClickHandler = async () => { //done
     list.deleteTail();
+    setControlsState({
+      ...controlsState, 
+      delHead: {isLoading: false, disabled: false},
+      delTail: {isLoading: true, disabled: false},
+      delIndex: {isLoading: false, disabled: false}
+    })
     const newDisplayedList = displayedList;
     const deleteIndex =  newDisplayedList.length - 1;
     newDisplayedList[deleteIndex].shiftElement = {
@@ -134,12 +217,22 @@ export const ListPage: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     newDisplayedList.pop();
     setDisplayedList([...newDisplayedList]);
+    setControlsState({...controlsState, delTail: {isLoading: false, disabled: false}})
+    if (newDisplayedList.length === 0) {
+      setControlsState({
+        ...controlsState, 
+        delHead: {isLoading: false, disabled: true},
+        delTail: {isLoading: false, disabled: true},
+        delIndex: {isLoading: false, disabled: true}
+      })
+    }
   }
 
 
   const addByIndexButtonClickHandler = async () => {
-    if (value && index) {
-      list.addByIndex(value, index);
+    setControlsState({...controlsState, addIndex: {isLoading: true, disabled: false}})
+    if (value && parseInt(index) && parseInt(index) < displayedList.length) {
+      list.addByIndex(value, parseInt(index));
       const newDisplayedList = displayedList;
       const newElement: IListArr = {
         value: '', 
@@ -150,37 +243,55 @@ export const ListPage: React.FC = () => {
           position: 'addAction',
         }
       }
-      newDisplayedList.splice(index, 0, newElement);         
+      newDisplayedList.splice(parseInt(index), 0, newElement);         
       setDisplayedList([...newDisplayedList]);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      newDisplayedList[index] = {
+      newDisplayedList[parseInt(index)] = {
         value: value,
         state: ElementStates.Default,
         shiftElement: null,
       }
       setDisplayedList([...newDisplayedList]);
+      
+      
     }
+    setControlsState({...controlsState, addIndex: {isLoading: false, disabled: true}, delIndex: {isLoading: false, disabled: true}})
+    setValue('');
+      setIndex('');
   }
 
   const deleteByIndexButtonClickHandler = async () => {
+    setControlsState({...controlsState, addIndex: {isLoading: false, disabled: true}, delIndex: {isLoading: true, disabled: true}})
     if (index) {
-      list.deleteByIndex(index);
+      list.deleteByIndex(parseInt(index));
       const newDisplayedList = displayedList;
-      newDisplayedList[index].shiftElement = {
-          value: newDisplayedList[index].value,
+      newDisplayedList[parseInt(index)].shiftElement = {
+          value: newDisplayedList[parseInt(index)].value,
           state: ElementStates.Changing,
           position: 'removeAction',
       }
-      newDisplayedList[index] = {
-        ...newDisplayedList[index],
+      newDisplayedList[parseInt(index)] = {
+        ...newDisplayedList[parseInt(index)],
         value: '',
         state: ElementStates.Changing
       }
       setDisplayedList([...newDisplayedList]);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      newDisplayedList.splice(index, 1);
+      newDisplayedList.splice(parseInt(index), 1);
       setDisplayedList([...newDisplayedList]);
+      
+      if (newDisplayedList.length === 0) {
+        setControlsState({
+          ...controlsState, 
+          delHead: {isLoading: false, disabled: true},
+          delTail: {isLoading: false, disabled: true},
+          delIndex: {isLoading: false, disabled: true}
+        })
+      }
     }
+    setControlsState({...controlsState, addIndex: {isLoading: false, disabled: true}, delIndex: {isLoading: false, disabled: true}})
+    setValue('');
+    setIndex('');
   }
 
 
@@ -194,9 +305,11 @@ export const ListPage: React.FC = () => {
                 maxLength={4}      
                 type="text"          
                 isLimitText={true}
-                autoFocus
+               
                 placeholder="введите значение"
                 onChange={valueInputOnChangeHandler}
+                value={value}
+                
               />
             </div>
             <Button          
@@ -204,12 +317,16 @@ export const ListPage: React.FC = () => {
               text="Добавить в head"
               onClick={addToHeadClickHandler}
               linkedList={'small'}
+              isLoader={controlsState.addHead.isLoading}
+              disabled={controlsState.addHead.disabled}
             />
             <Button          
               type="button"
               text="Добавить в tail"
               onClick={addToTailClickHandler}
               linkedList={'small'}
+              isLoader={controlsState.addTail.isLoading}
+              disabled={controlsState.addTail.disabled}
             />
       
             <Button          
@@ -217,12 +334,16 @@ export const ListPage: React.FC = () => {
                 text="Удалить из head"
                 onClick={deleteHeadButtonClickHandler}
                 linkedList={'small'}
+                isLoader={controlsState.delHead.isLoading}
+                disabled={controlsState.delHead.disabled}
             />
             <Button          
                 type="button"
                 text="Удалить из tail"
                 onClick={deleteTailButtonClickHandler}
                 linkedList={'small'}
+                isLoader={controlsState.delTail.isLoading}
+                disabled={controlsState.delTail.disabled}
             />
         </fieldset>
         <fieldset className={styles.fieldset}>
@@ -231,6 +352,7 @@ export const ListPage: React.FC = () => {
                 type="text"          
                 placeholder='введите индекс'
                 onChange={indexInputOnChangeHandler}
+                value={index}
               />
             </div>
             <Button          
@@ -238,12 +360,16 @@ export const ListPage: React.FC = () => {
               text="Добавить по индексу"
               onClick={addByIndexButtonClickHandler}
               linkedList={'big'}
+              isLoader={controlsState.addIndex.isLoading}
+              disabled={controlsState.addIndex.disabled}
             />
             <Button          
               type="button"
               text="Удалить по индексу"
               onClick={deleteByIndexButtonClickHandler}
               linkedList={'big'}
+              isLoader={controlsState.delIndex.isLoading}
+              disabled={controlsState.delIndex.disabled}
             />
         </fieldset>
       </form>

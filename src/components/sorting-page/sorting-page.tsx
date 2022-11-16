@@ -8,17 +8,32 @@ import { Direction } from "../../types/direction";
 import { randomArrFunc } from "../utils/sort-page-utils";
 import { columnStyle } from "../utils/sort-page-utils";
 
+type TControlsState = {disabled: {sortingButtons: boolean, arrButton: boolean; radioButtons: boolean }; isLoading: {ascButton: boolean, descButton: boolean; arrButton: boolean}}
+
+const initialControlsState: TControlsState = {
+  disabled: {
+    sortingButtons: false,
+    arrButton: false,
+    radioButtons: false,
+  },
+  isLoading: {
+    arrButton: false,
+    ascButton: false,
+    descButton: false,
+  }
+}
+
 
 export const SortingPage: React.FC = () => {
 
   const [ sortingType, setSortingType] = useState<string>('selectionSort');
-  //const [ sortingDirection, setSortingDirection ] = useState<string>('');
-  const [ arrayToSort, setArrayToSort ] = useState<number[]>([]);
+  const [ arrayToSort, setArrayToSort ] = useState<number[]>(randomArrFunc());
   const [ loader, setButtonLoader ] = useState<boolean>(false);
   const [modifiedIndexes, setModifiedIndexes] = useState<number[]>([]);
   const [changingIndexes, setChangingIndexes] = useState<number[]>([]);
-  //console.log(changingIndexes);
-  //console.log(modifiedIndexes);
+  const [controlsState, setControlsState] = useState<TControlsState>(initialControlsState);
+  
+
 
  
 
@@ -43,7 +58,6 @@ export const SortingPage: React.FC = () => {
         }
        
         setArrayToSort([...newArr]);
-        //setModifiedIndexes(indexArr);
         setChangingIndexes([]);
         const newModIndexesArr = modifiedIndexes;
         newModIndexesArr.push(t)
@@ -59,7 +73,20 @@ export const SortingPage: React.FC = () => {
     
     
     setArrayToSort([...newArr]);
-    setButtonLoader(false);
+    setControlsState(
+      {
+        disabled: {
+          sortingButtons: false,
+          arrButton: false,
+          radioButtons: false,
+        },
+        isLoading: {
+          arrButton: false,
+          ascButton: false,
+          descButton: false,
+        }
+      }
+    )
   }
 
 
@@ -99,7 +126,20 @@ export const SortingPage: React.FC = () => {
       setModifiedIndexes(newModIndexesArr);
     }
     setArrayToSort([...newArr])
-    setButtonLoader(false);
+    setControlsState(
+      {
+        disabled: {
+          sortingButtons: false,
+          arrButton: false,
+          radioButtons: false,
+        },
+        isLoading: {
+          arrButton: false,
+          ascButton: false,
+          descButton: false,
+        }
+      }
+    )
   }
 
 
@@ -112,10 +152,16 @@ export const SortingPage: React.FC = () => {
   }
 
   const directionButtonClickHandler = (event: SyntheticEvent<HTMLButtonElement>) => {
-    //setSortingDirection(event.currentTarget.id);
     const sortingDirection = event.currentTarget.id;
     setButtonLoader(true);
     setModifiedIndexes([...[]]);
+    setControlsState(
+      {isLoading: {
+        ascButton: sortingDirection === 'Ascending',
+        descButton: sortingDirection === 'Descending',
+        arrButton: false,
+      }, 
+      disabled: {sortingButtons: true, arrButton: true, radioButtons: true}})
 
     if (sortingType === 'selectionSort') {
       selectionSortFunc(sortingDirection);
@@ -125,22 +171,23 @@ export const SortingPage: React.FC = () => {
   }
 
   const createArrayButtonClickHandler = () => {
-      
+    
     setArrayToSort(randomArrFunc());
+    setControlsState({...controlsState, disabled: {radioButtons: false, sortingButtons: false, arrButton: false}})
   }
 
   return (
     <SolutionLayout title="Сортировка массива">
       <div className={styles.controls_container}>
         <div className={styles.controls_wrapper}>
-          <RadioInput label='Выбор' name='sortingType' value='selectionSort' onChange={radioOnChangeHandler} checked={sortingType === 'selectionSort'} />
-          <RadioInput label='Пузырёк' name='sortingType' value='bubbleSort' onChange={radioOnChangeHandler} />
+          <RadioInput label='Выбор' name='sortingType' value='selectionSort' onChange={radioOnChangeHandler} checked={sortingType === 'selectionSort'} disabled={controlsState.disabled.radioButtons} />
+          <RadioInput label='Пузырёк' name='sortingType' value='bubbleSort' onChange={radioOnChangeHandler} disabled={controlsState.disabled.radioButtons} />
         </div>
         <div className={styles.controls_wrapper}>
-          <Button sorting={Direction.Ascending} text='По возрастанию' id='Ascending' onClick={directionButtonClickHandler} isLoader={loader} />
-          <Button sorting={Direction.Descending} text='По убыванию' id='Descending' onClick={directionButtonClickHandler} isLoader={loader} />
+          <Button sorting={Direction.Ascending} text='По возрастанию' id='Ascending' onClick={directionButtonClickHandler} isLoader={controlsState.isLoading.ascButton} disabled={controlsState.disabled.sortingButtons} />
+          <Button sorting={Direction.Descending} text='По убыванию' id='Descending' onClick={directionButtonClickHandler} isLoader={controlsState.isLoading.descButton} disabled={controlsState.disabled.sortingButtons} />
         </div>
-        <Button text='Новый массив' onClick={createArrayButtonClickHandler} isLoader={loader}/>  
+        <Button text='Новый массив' onClick={createArrayButtonClickHandler} isLoader={controlsState.isLoading.arrButton} disabled={controlsState.disabled.arrButton} />  
       </div>
 
 
