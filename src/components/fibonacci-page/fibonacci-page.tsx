@@ -10,13 +10,23 @@ export const FibonacciPage: React.FC = () => {
   const [ value, setValue ] = useState<string>('');
   const [ result, setResult ] = useState<number[]>([]);
   const [ loader, setButtonLoader ] = useState<boolean>(false);
+  const [controlsState, setControlsState] = useState<{disabled: boolean; isLoading: boolean}>({
+    disabled: true,
+    isLoading: false,
+  })
+
 
   const onChange = (event: FormEvent<HTMLInputElement>) => {
     event.preventDefault();
-    setValue(event.currentTarget.value);
+    if (event.currentTarget.validity.valid) {
+      setValue(event.currentTarget.value);
+      setControlsState({...controlsState, disabled: false})
+    }
+    
   }
 
   const resultFunc = async (arr: number[]) => {
+      
   
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -34,13 +44,14 @@ export const FibonacciPage: React.FC = () => {
 
     }
 
-    setButtonLoader(false);
+    setControlsState({isLoading: false, disabled: true})
   
   }
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setButtonLoader(true)
+    setValue('');
+    setControlsState({isLoading: true, disabled: true})
 
     let arr: number[] = [];
     resultFunc(arr);
@@ -60,11 +71,14 @@ export const FibonacciPage: React.FC = () => {
           isLimitText={true}
           onChange={onChange}
           autoFocus
+          value={value}
+          max={19}
         />
         <Button
+          disabled={controlsState.disabled}
           type="submit"
           text="Рассчитать"
-          isLoader={loader}
+          isLoader={controlsState.isLoading}
         />
       </form>
 

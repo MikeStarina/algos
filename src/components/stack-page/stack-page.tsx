@@ -9,11 +9,26 @@ import { Stack } from "./stack-class/stack-class";
 
 const stackItem = new Stack<string>()
 
+type TControlsState = {
+  disabled: {delBttn: boolean; addBttn: boolean; clearBttn: boolean}
+  loading: {delBttn: boolean; addBttn: boolean; clearBttn: boolean}
+}
+
 export const StackPage: React.FC = () => {
 
   const [ value, setValue ] = useState<string>('');
   const [ stack, setStack ] = useState<string[]>([]);
   const [ modifiedIndex, setModifiedIndex ] = useState<number>(-1);
+  const [ controlsState, setControlsState ] = useState<TControlsState>({
+    disabled: {
+      delBttn: true,
+      addBttn: true,
+      clearBttn: true,
+    },
+    loading: {delBttn: false, addBttn: false, clearBttn: false}
+    
+  })
+
   
 
 
@@ -22,21 +37,25 @@ export const StackPage: React.FC = () => {
     const newStack = stack;
     newStack.push(value);
     setStack([...newStack]);
+    setControlsState({loading: {addBttn: true, clearBttn: false, delBttn: false}, disabled: {addBttn: true, delBttn: false, clearBttn: false}})
     setModifiedIndex(getStackSize(stack) - 1);
+    
     await new Promise(resolve => setTimeout(resolve, 1000));
     setModifiedIndex(-1);
+    setControlsState({loading: {addBttn: false, clearBttn: false, delBttn: false}, disabled: {addBttn: true, delBttn: false, clearBttn: false}})
   }
 
   const removeFromStack = async () => {
     stackItem.pop();
-    setModifiedIndex(getStackSize(stack) - 1);
+    setModifiedIndex(stack.length - 1);
+    setControlsState({...controlsState, loading: {addBttn: false, clearBttn: false, delBttn: true}})
     await new Promise(resolve => setTimeout(resolve, 1000));
     setModifiedIndex(-1);
     
     const newStack = stack;
     newStack.pop();
     setStack([...newStack]);
-   
+    setControlsState({...controlsState, loading: {addBttn: false, clearBttn: false, delBttn: false}})
   }
 
   const getStackSize = (stack: string[]) => {
@@ -45,25 +64,41 @@ export const StackPage: React.FC = () => {
 
   const onChange = (event: FormEvent<HTMLInputElement>) => {
     event.preventDefault();
-    setValue(event.currentTarget.value);
+    if (event.currentTarget.validity.valid) {
+      setValue(event.currentTarget.value);
+      setControlsState({...controlsState, disabled: {addBttn: false, delBttn: true, clearBttn: true}})
+    }
+    if (stack.length > 0) {
+      setControlsState({...controlsState, disabled: {addBttn: false, delBttn: false, clearBttn: false}})
+    }
+    
   }
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     if (value) addToStackFunc(value);
     
-    event.currentTarget.reset();
     setValue('');
+    
   }
 
   const deleteButtonOnClickHandler = () => {
+
+    stackItem.pop();
     removeFromStack();
+   
+    if (stack.length === 0) {
+      setControlsState({...controlsState, disabled: {addBttn: true, delBttn: true, clearBttn: true}})
+    }
     
   }
 
   const resetButtonClickHandler = () => {
     setStack([...[]]);
     stackItem.clear();
+    setControlsState({...controlsState, disabled: {addBttn: true, delBttn: true, clearBttn: true}})
+    setValue('');
   }
 
   return (
@@ -75,21 +110,28 @@ export const StackPage: React.FC = () => {
           isLimitText={true}
           autoFocus
           onChange={onChange}
+          value={value}
         />
         <Button          
           type="submit"
           text="Добавить"
+          disabled={controlsState.disabled.addBttn}
+          isLoader={controlsState.loading.addBttn}
         />
         <Button          
           type="button"
           text="Удалить"
           onClick={deleteButtonOnClickHandler}
+          disabled={controlsState.disabled.delBttn}
+          isLoader={controlsState.loading.delBttn}
         />
         <div className={styles.button_container}>
           <Button          
             type="button"
             text="Очистить"
             onClick={resetButtonClickHandler}
+            disabled={controlsState.disabled.clearBttn}
+            isLoader={controlsState.loading.clearBttn}
           />
         </div>
       </form>
@@ -101,7 +143,7 @@ export const StackPage: React.FC = () => {
                 key={index}
                 letter={item}
                 index={index}
-                head={index === getStackSize(stack) - 1 ? 'top' : ''}
+                head={index === stack.length - 1 ? 'top' : ''}
                 state={stackCircleStyle(index, modifiedIndex)}
               />
         ))}
