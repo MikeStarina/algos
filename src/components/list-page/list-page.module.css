@@ -1,0 +1,40 @@
+.form {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.fieldset {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 12px;
+    box-sizing: border-box;
+    border: none;
+}
+
+.fieldset:last-of-type {
+    margin-top: 10px;
+}
+
+
+
+.result_container {
+    width: 100%;
+    margin: 120px auto 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
