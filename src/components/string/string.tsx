@@ -4,15 +4,17 @@ import { SolutionLayout } from "../ui/solution-layout/solution-layout";
 import { Input } from "../ui/input/input";
 import { Button } from "../ui/button/button";
 import { Circle } from "../ui/circle/circle";
-import { circleStyle } from "../utils/string-utils";
-import { swap } from "../utils/string-utils";
+import { reverseFunc } from "../utils/string-utils";
+import { ElementStates } from '../../types/element-states';
+import { TLettersArray } from "../../types/string";
 import styles from "./string.module.css";
+
+
+
 
 export const StringComponent: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
-  const [lettersArray, setLettersArray] = useState<string[]>([]);
-  const [modifiedIndexes, setModifiedIndexes] = useState<number[]>([]);
-  const [changingIndexes, setChangingIndexes] = useState<number[]>([]);
+  const [lettersArray, setLettersArray] = useState<TLettersArray[] | undefined>([]);
   const [controlsState, setControlsState] = useState<{disabled: boolean; isLoading: boolean}>({
     disabled: true,
     isLoading: false,
@@ -25,37 +27,42 @@ export const StringComponent: React.FC = () => {
     if (event.currentTarget.validity.valid) {
       setControlsState({...controlsState, disabled: false});
       setInputValue(event.currentTarget.value);
-      setModifiedIndexes([]);
-      const arrayFromValue = event.currentTarget.value.split("");
+      const arrayFromValue: Array<TLettersArray> = event.currentTarget.value.split("")
+      .map((item) => {
+       
+        const newItem = {
+          value: item,
+          itemState: ElementStates.Default,
+        }
+
+        return newItem;
+      });
+ 
       setLettersArray(arrayFromValue);
     }
    
   };
 
-  const reverse = async (arr: string[]) => {
+
+
+  
+
+  const reverse = async (lettersArray: TLettersArray[]) => {
     setControlsState({ disabled: true, isLoading: true })
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    for (let i = 0; i <= Math.floor(lettersArray.length / 2); i++) {
-      const headIndex = i;
-      const tailIndex = lettersArray.length - 1 - i;
-      setChangingIndexes([headIndex, tailIndex]);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      swap(lettersArray, headIndex, tailIndex);
-      setChangingIndexes([]);
-      const updatedIndexes = modifiedIndexes;
-      updatedIndexes.push(headIndex, tailIndex);
-      setModifiedIndexes([...updatedIndexes]);
-    }
-
-    setLettersArray([...lettersArray]);
+    
+    const newArr = await reverseFunc(lettersArray, setLettersArray);
+    
+    setLettersArray([...newArr]);    
     setControlsState({ disabled: true, isLoading: false })
-  };
+  }; 
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setInputValue('');
-    reverse(lettersArray);
+    if (lettersArray) {
+      reverse(lettersArray);
+    }
+   
     
   };
 
@@ -84,8 +91,8 @@ export const StringComponent: React.FC = () => {
           lettersArray.map((item, index) => (
             <Circle
               key={index}
-              letter={item}
-              state={circleStyle(index, modifiedIndexes, changingIndexes)}
+              letter={item.value}
+              state={item.itemState}
             />
           ))}
       </div>
