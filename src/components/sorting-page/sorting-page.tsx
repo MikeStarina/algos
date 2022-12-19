@@ -6,6 +6,7 @@ import { Column } from "../ui/column/column";
 import { RadioInput } from "../ui/radio-input/radio-input";
 import { Direction } from "../../types/direction";
 import { randomArrFunc } from "../utils/sort-page-utils";
+import { selectionSort, bubbleSort } from "../utils/sort-page-utils";
 import { columnStyle } from "../utils/sort-page-utils";
 
 type TControlsState = {disabled: {sortingButtons: boolean, arrButton: boolean; radioButtons: boolean }; isLoading: {ascButton: boolean, descButton: boolean; arrButton: boolean}}
@@ -37,9 +38,10 @@ export const SortingPage: React.FC = () => {
 
  
 
-  const selectionSortFunc = async (sortingDirection: string) => {
+  const selectionSortFunc = async (sortingDirection: string, selectionSort: any) => {
     const newArr = arrayToSort;
     const { length } = newArr;
+    /*
     for (let i = 0; i < length - 1; i++) {
       let maxInd = i;
       for (let t = i + 1; t < length; t++) {
@@ -69,10 +71,9 @@ export const SortingPage: React.FC = () => {
       setModifiedIndexes(newModIndexesArr);
       
       setChangingIndexes([]);
-    }
-    
-    
-    setArrayToSort([...newArr]);
+    } */
+    const arr: any = await selectionSort(sortingDirection, newArr, length, setArrayToSort);
+    setArrayToSort([...arr]);
     setControlsState(
       {
         disabled: {
@@ -93,9 +94,11 @@ export const SortingPage: React.FC = () => {
 
 
 
-  const bubbleSortFunc = async (sortingDirection: string) => {
+  const bubbleSortFunc = async (sortingDirection: string, bubbleSort: any) => {
     const newArr = arrayToSort;
+
     setModifiedIndexes([]);
+    /*
     for (let t = newArr.length - 1; t > 0; t--) {
       
       for (let i = 0; i < t; i++) {
@@ -124,8 +127,10 @@ export const SortingPage: React.FC = () => {
       const newModIndexesArr = modifiedIndexes;
       newModIndexesArr.push(t)
       setModifiedIndexes(newModIndexesArr);
-    }
-    setArrayToSort([...newArr])
+    } 
+    */
+    const arr: any = bubbleSort(sortingDirection, newArr, length, setArrayToSort); 
+    setArrayToSort([...arr])
     setControlsState(
       {
         disabled: {
@@ -164,9 +169,9 @@ export const SortingPage: React.FC = () => {
       disabled: {sortingButtons: true, arrButton: true, radioButtons: true}})
 
     if (sortingType === 'selectionSort') {
-      selectionSortFunc(sortingDirection);
+      selectionSortFunc(sortingDirection, selectionSort);
     } else {
-      bubbleSortFunc(sortingDirection);
+      bubbleSortFunc(sortingDirection, bubbleSort);
     }
   }
 

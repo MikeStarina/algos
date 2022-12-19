@@ -28,7 +28,7 @@ export const FibonacciPage: React.FC = () => {
   const resultFunc = async (arr: number[]) => {
       
   
-      await new Promise(resolve => setTimeout(resolve, 1000));
+     // await new Promise(resolve => setTimeout(resolve, 1000));
 
     for (let i = 0; i <= parseInt(value); i++) {
 

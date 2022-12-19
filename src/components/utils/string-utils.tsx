@@ -1,7 +1,8 @@
 import { ElementStates } from "../../types/element-states";
+import { TLettersArray } from "../../types/string";
 
 export const swap = (
-  arr: string[],
+  arr: TLettersArray[],
   headIndex: number,
   tailIndex: number
 ): void => {
@@ -10,16 +11,35 @@ export const swap = (
   arr[tailIndex] = temp;
 };
 
-export const circleStyle = (
-  index: number,
-  modifiedIndexes: number[],
-  changingIndexes: number[]
-) => {
-  if (modifiedIndexes.findIndex((item) => item === index) !== -1) {
-    return ElementStates.Modified;
-  } else if (changingIndexes.findIndex((item) => item === index) !== -1) {
-    return ElementStates.Changing;
-  } else {
-    return ElementStates.Default;
-  }
+
+export const reverseFunc = async ( lettersArray: TLettersArray[], setLettersArray: (arr: TLettersArray[]) => void ) => {
+  
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  
+  for (let i = 0; i < Math.floor(lettersArray.length / 2); i++) {
+
+    const headIndex = i;
+    const tailIndex = lettersArray.length - 1 - i;
+    lettersArray[headIndex].itemState = ElementStates.Changing;
+    lettersArray[tailIndex].itemState = ElementStates.Changing;
+    setLettersArray([...lettersArray]);
+    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    swap(lettersArray, headIndex, tailIndex);
+    lettersArray[headIndex].itemState = ElementStates.Modified;
+    lettersArray[tailIndex].itemState = ElementStates.Modified;
+    setLettersArray([...lettersArray]);
+   
+  } 
+
+  
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  lettersArray.forEach((item: any) => {
+    if (item.itemState === ElementStates.Default) item.itemState = ElementStates.Changing;
+    
+  })
+  setLettersArray([...lettersArray]);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  lettersArray.map((item: any) => {item.itemState = ElementStates.Modified})
+  return lettersArray;
 };
